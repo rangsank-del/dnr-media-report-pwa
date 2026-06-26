@@ -6,6 +6,249 @@
     <meta name="theme-color" content="#14243a" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="DNR Media" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>DNR Media Report</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" />
+    <link rel="apple-touch-icon" href="icons/icon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="rail" aria-label="เมนูหลัก">
+        <div class="brand-mark" aria-label="DNR">D</div>
+        <nav class="rail-nav">
+          <button class="icon-button active" data-view="overview" aria-label="ภาพรวม">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/></svg>
+          </button>
+          <button class="icon-button" data-view="records" aria-label="รายการงาน">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v3H5V5Zm0 5h14v3H5v-3Zm0 5h14v3H5v-3Z"/></svg>
+          </button>
+          <button class="icon-button" data-view="weekly" aria-label="รายสัปดาห์">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v2H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7Zm12 8v9H5v-9h14Z"/></svg>
+          </button>
+          <button class="icon-button" data-view="assets" aria-label="รูปประกอบ">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2ZM8.5 8.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4Zm10.5 9H5l4-4 2.5 2.5L15 12l4 5.5Z"/></svg>
+          </button>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">DNR Media Operations</p>
+            <h1>ระบบรายงานสื่อ</h1>
+          </div>
+          <div class="top-actions">
+            <button class="ghost-button" id="resetData">คืนค่าจากชีต</button>
+            <button class="primary-button" id="openForm">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z"/></svg>
+              เพิ่มงาน
+            </button>
+          </div>
+        </header>
+
+        <section class="command-strip" aria-label="ตัวกรองข้อมูล">
+          <label class="search-box">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20.7 19.3-4.1-4.1a7 7 0 1 0-1.4 1.4l4.1 4.1 1.4-1.4ZM5 11a6 6 0 1 1 12 0A6 6 0 0 1 5 11Z"/></svg>
+            <input id="searchInput" type="search" placeholder="ค้นหาชื่องาน ผู้รับผิดชอบ ช่องทาง หรือหมายเหตุ" />
+          </label>
+          <select id="typeFilter" aria-label="กรองประเภทงาน"></select>
+          <select id="ownerFilter" aria-label="กรองผู้รับผิดชอบ"></select>
+          <select id="statusFilter" aria-label="กรองสถานะ"></select>
+          <button class="icon-text-button" id="exportCsv">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20h14v-2H5v2ZM13 4h-2v8.2L8 9.2 6.6 10.6 12 16l5.4-5.4L16 9.2l-3 3V4Z"/></svg>
+            CSV
+          </button>
+          <button class="icon-text-button" id="exportJson">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v2H4V4Zm0 5h16v2H4V9Zm0 5h10v2H4v-2Zm0 5h10v2H4v-2Zm13-5 3 3-3 3-1.4-1.4 1.6-1.6-1.6-1.6L17 14Z"/></svg>
+            JSON
+          </button>
+        </section>
+
+        <section class="view active" id="overviewView">
+          <div class="metric-grid" id="metricGrid"></div>
+          <div class="split-layout">
+            <section class="panel">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Production Mix</p>
+                  <h2>สัดส่วนงานตามประเภท</h2>
+                </div>
+              </div>
+              <div class="bar-list" id="typeBars"></div>
+            </section>
+            <section class="panel accent-panel">
+              <div class="section-head">
+                <div>
+                  <p class="eyebrow">Attention</p>
+                  <h2>รายการที่ต้องตรวจต่อ</h2>
+                </div>
+              </div>
+              <div class="insight-list" id="insightList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="recordsView">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Media Tasks</p>
+              <h2>รายการงานทั้งหมด</h2>
+            </div>
+            <span class="counter" id="recordCounter"></span>
+          </div>
+          <div class="record-grid" id="recordGrid"></div>
+        </section>
+
+        <section class="view" id="weeklyView">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Weekly Summary</p>
+              <h2>ภาพรวมรายสัปดาห์</h2>
+            </div>
+          </div>
+          <div class="week-grid" id="weekGrid"></div>
+        </section>
+
+        <section class="view" id="assetsView">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Media Assets</p>
+              <h2>รายการรูปประกอบ</h2>
+            </div>
+          </div>
+          <div class="asset-board" id="assetBoard"></div>
+        </section>
+      </main>
+    </div>
+
+    <dialog class="task-dialog" id="taskDialog">
+      <form method="dialog" class="task-form" id="taskForm">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Task Editor</p>
+            <h2 id="formTitle">เพิ่มงานสื่อ</h2>
+          </div>
+          <button class="icon-button subtle" type="button" id="closeForm" aria-label="ปิด">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4 6.4 5Zm12.6 1.4L6.4 19 5 17.6 17.6 5 19 6.4Z"/></svg>
+          </button>
+        </div>
+
+        <input type="hidden" name="id" />
+        <div class="form-stack">
+          <section class="form-section">
+            <div class="form-grid primary-fields">
+              <label class="wide">ชื่องาน<input name="title" required autofocus placeholder="ระบุชื่องาน" /></label>
+              <label>วันที่<input name="date" placeholder="25 มิ.ย." /></label>
+              <label>ประเภทงาน<select name="type" required></select></label>
+              <label>ผู้รับผิดชอบ<input name="owner" placeholder="ชื่อผู้รับผิดชอบ" /></label>
+              <label>จำนวน<input name="quantity" type="number" min="0" step="1" /></label>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="form-grid">
+              <label>สถานะ<select name="status" required></select></label>
+              <div class="quick-field">
+                <span>เลือกสถานะ</span>
+                <div class="quick-row" data-target="status">
+                  <button type="button" data-value="เสร็จ">เสร็จ</button>
+                  <button type="button" data-value="กำลังดำเนินการ">กำลังดำเนินการ</button>
+                  <button type="button" data-value="รอดำเนินการ">รอดำเนินการ</button>
+                </div>
+              </div>
+              <label>ผลลัพธ์<select name="outcome"></select></label>
+              <div class="quick-field">
+                <span>เลือกผลลัพธ์</span>
+                <div class="quick-row" data-target="outcome">
+                  <button type="button" data-value="ใช้งานจริง">ใช้งานจริง</button>
+                  <button type="button" data-value="กำลังดำเนินการ">กำลังดำเนินการ</button>
+                  <button type="button" data-value="รอดำเนินการ">รอดำเนินการ</button>
+                </div>
+              </div>
+              <label class="wide">ช่องทางเผยแพร่<input name="channels" list="channelOptions" placeholder="Facebook, Line@" /></label>
+              <label class="wide">รูปประกอบ<input name="asset" placeholder="ชื่อไฟล์ โฟลเดอร์ หรือ URL" /></label>
+            </div>
+          </section>
+
+          <section class="form-section optional-section">
+            <div class="form-grid">
+              <label class="wide">ปัญหา / ข้อจำกัด<textarea name="issue" rows="3"></textarea></label>
+              <label class="wide">แผนต่อไป<textarea name="next" rows="3"></textarea></label>
+            </div>
+          </section>
+        </div>
+        <datalist id="channelOptions">
+          <option value="Facebook"></option>
+          <option value="Line@"></option>
+          <option value="Website"></option>
+          <option value="Tiktok"></option>
+          <option value="Youtube"></option>
+          <option value="Offline"></option>
+        </datalist>
+        <div class="dialog-actions">
+          <button class="danger-button" type="button" id="deleteTask">ลบงาน</button>
+          <span></span>
+          <button class="ghost-button" type="button" id="cancelForm">ยกเลิก</button>
+          <button class="primary-button" type="submit" value="default">บันทึก</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="asset-dialog" id="assetDialog">
+      <form method="dialog" class="asset-form" id="assetForm">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow">Attach File</p>
+            <h2 id="assetFormTitle">แนบไฟล์ประกอบ</h2>
+          </div>
+          <button class="icon-button subtle" type="button" id="closeAssetForm" aria-label="ปิด">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4 6.4 5Zm12.6 1.4L6.4 19 5 17.6 17.6 5 19 6.4Z"/></svg>
+          </button>
+        </div>
+        <input type="hidden" name="id" />
+        <label class="asset-input-label">ไฟล์ / รูป / วิดีโอ / URL
+          <input name="asset" placeholder="วาง URL หรือใส่ชื่อไฟล์จาก Drive" />
+        </label>
+        <div class="asset-dialog-actions">
+          <button class="ghost-button" type="button" id="clearAsset">ล้างไฟล์</button>
+          <span></span>
+          <button class="ghost-button" type="button" id="cancelAssetForm">ยกเลิก</button>
+          <button class="primary-button" type="submit">บันทึกไฟล์</button>
+        </div>
+      </form>
+    </dialog>
+
+    <template id="recordTemplate">
+      <article class="record-card">
+        <div class="record-top">
+          <div>
+            <p class="record-date"></p>
+            <h3></h3>
+          </div>
+          <button class="icon-button edit-task" aria-label="แก้ไขงาน">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17.3V20h2.7L17.8 8.9l-2.7-2.7L4 17.3ZM19.7 7a1 1 0 0 0 0-1.4l-1.3-1.3a1 1 0 0 0-1.4 0l-1 1L18.7 8l1-1Z"/></svg>
+          </button>
+        </div>
+        <div class="chips"></div>
+        <dl class="record-meta"></dl>
+        <div class="asset-strip"></div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#14243a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-touch-fullscreen" content="yes" />
     <meta name="apple-mobile-web-app-title" content="DNR Media" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
